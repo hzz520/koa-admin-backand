@@ -15,19 +15,22 @@ generator docs {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model article {
-  id       Int    @id @default(autoincrement()) @db.UnsignedInt
-  url      String @default("") @db.VarChar(300)
-  osskey   String @default("") @db.VarChar(100)
-  title    String @default("") @db.VarChar(200)
-  authorId Int    @db.UnsignedInt
-  author   user   @relation(fields: [authorId], references: [id])
+  id       Int      @id @default(autoincrement()) @db.UnsignedInt
+  url      String   @default("") @db.VarChar(300)
+  osskey   String   @default("") @db.VarChar(100)
+  title    String   @default("") @db.VarChar(200)
+  authorId Int      @db.UnsignedInt
+  createAt DateTime @default(now()) @db.Timestamp(0)
+  updateAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  author   user     @relation(fields: [authorId], references: [id])
 
-  @@index([authorId], map: "article_authorId_fkey")
+  @@index([authorId])
 }
 
 model user {
@@ -35,15 +38,19 @@ model user {
   name     String    @default("") @db.VarChar(20)
   password String    @default("") @db.VarChar(100)
   roleId   Int       @db.UnsignedInt
+  createAt DateTime  @default(now()) @db.Timestamp(0)
+  updateAt DateTime  @default(now()) @updatedAt @db.Timestamp(0)
   articles article[]
   role     role      @relation(fields: [roleId], references: [id])
 
-  @@index([roleId], map: "user_roleId_fkey")
+  @@index([roleId])
 }
 
 model role {
-  id    Int    @id @default(autoincrement()) @db.UnsignedInt
-  name  String @default("") @db.VarChar(100)
-  code  Int
-  users user[]
+  id       Int      @id @default(autoincrement()) @db.UnsignedInt
+  name     String   @default("") @db.VarChar(100)
+  code     Int
+  createAt DateTime @default(now()) @db.Timestamp(0)
+  updateAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  users    user[]
 }

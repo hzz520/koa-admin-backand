@@ -8,6 +8,8 @@ class ArticleService {
   async getList({
     title,
     author,
+    createAt,
+    updateAt,
     page = 1,
     pageSize = 10,
   }: z.infer<typeof GETLIST_REQ_DTO>) {
@@ -20,6 +22,14 @@ class ArticleService {
           contains: author,
         },
       },
+      createAt: {
+        gte: createAt?.[0],
+        lte: createAt?.[1],
+      },
+      updateAt: {
+        gte: updateAt?.[0],
+        lte: updateAt?.[1],
+      }
     } as Prisma.articleWhereInput
 
     const total = await prisma.article.count({
@@ -36,12 +46,14 @@ class ArticleService {
             name: true,
           },
         },
+        createAt: true,
+        updateAt: true,
       },
       where,
       take: pageSize,
       skip: (page - 1) * pageSize,
       orderBy: {
-        id: 'desc',
+        updateAt: 'desc'
       },
     })
 
@@ -110,7 +122,7 @@ class ArticleService {
   async getDetail({ id }: z.infer<typeof DETAIL_REQ_DTO>) {
     const data = await prisma.article.findFirst({
       where: { id: { equals: id } },
-      select: { id: true, osskey: true, title: true, author: true },
+      select: { id: true, osskey: true, title: true, author: true, createAt: true, updateAt: true },
     })
 
     if (data) {

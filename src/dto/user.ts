@@ -9,6 +9,8 @@ export const LIST_BODY_DTO = z
   .object({
     name: z.string().describe('用户名').openapi({ example: '' }),
     role: z.string().describe('角色').openapi({ example: '' }),
+    createAt: z.array(z.string()).describe('创建时间').openapi({ example: [] }),
+    updateAt: z.array(z.string()).describe('更新时间').openapi({ example: [] }),
   })
   .merge(page)
   .partial()

@@ -20,6 +20,8 @@ class UserService {
   async getList({
     name,
     role,
+    createAt,
+    updateAt,
     page = 1,
     pageSize = 10,
   }: z.infer<typeof LIST_BODY_DTO>) {
@@ -32,7 +34,16 @@ class UserService {
           contains: role,
         },
       },
+      createAt: {
+        gte: createAt?.[0],
+        lte: createAt?.[1],
+      },
+      updateAt: {
+        gte: updateAt?.[0],
+        lte: updateAt?.[1],
+      }
     } as Prisma.userWhereInput
+    
     const total = await prisma.user.count({ where })
     const list = await prisma.user.findMany({
       select: {
@@ -40,10 +51,12 @@ class UserService {
         name: true,
         password: true,
         role: true,
+        createAt: true,
+        updateAt: true,
       },
       where,
       orderBy: {
-        id: 'desc',
+        updateAt: 'desc',
       },
       skip: (page - 1) * pageSize,
       take: pageSize,

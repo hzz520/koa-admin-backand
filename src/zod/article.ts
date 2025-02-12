@@ -7,6 +7,8 @@ export const articleModel = z.object({
   osskey: z.string(),
   title: z.string(),
   authorId: z.number().int(),
+  createAt: z.date(),
+  updateAt: z.date(),
 })
 
 export interface Completearticle extends z.infer<typeof articleModel> {

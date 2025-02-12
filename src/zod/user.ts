@@ -6,6 +6,8 @@ export const userModel = z.object({
   name: z.string(),
   password: z.string(),
   roleId: z.number().int(),
+  createAt: z.date(),
+  updateAt: z.date(),
 })
 
 export interface Completeuser extends z.infer<typeof userModel> {

@@ -134,25 +134,6 @@ export class UserController {
     }
   }
 
-  // @routeConfig({
-  //   path: '/updatePwd',
-  //   method: 'post',
-  //   summary: '修改用户密码',
-  //   request: {
-  //     headers: headersDto,
-  //   }
-  // })
-  // @body(USER_UPDATEPWD_BODY_DTO)
-  // async updatePwd(ctx: Context) {
-  //   let data = ctx.request.body as z.infer<typeof USER_UPDATEPWD_BODY_DTO>
-
-  //   try {
-  //     await service.add(data)
-  //   } catch (error) {
-  //     ctx.body = Result.customFailed(error)
-  //   }
-  // }
-
   @routeConfig({
     path: '/addOrUpdate',
     method: 'post',
