@@ -1,0 +1,49 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+generator zod {
+  provider     = "zod-prisma"
+  output       = "../src/zod"
+  useDecimalJs = "false"
+}
+
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+  output   = "../public/prisma-docs"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model article {
+  id       Int    @id @default(autoincrement()) @db.UnsignedInt
+  url      String @default("") @db.VarChar(300)
+  osskey   String @default("") @db.VarChar(100)
+  title    String @default("") @db.VarChar(200)
+  authorId Int    @db.UnsignedInt
+  author   user   @relation(fields: [authorId], references: [id])
+
+  @@index([authorId], map: "article_authorId_fkey")
+}
+
+model user {
+  id       Int       @id @default(autoincrement()) @db.UnsignedInt
+  name     String    @default("") @db.VarChar(20)
+  password String    @default("") @db.VarChar(100)
+  roleId   Int       @db.UnsignedInt
+  articles article[]
+  role     role      @relation(fields: [roleId], references: [id])
+
+  @@index([roleId], map: "user_roleId_fkey")
+}
+
+model role {
+  id    Int    @id @default(autoincrement()) @db.UnsignedInt
+  name  String @default("") @db.VarChar(100)
+  code  Int
+  users user[]
+}
