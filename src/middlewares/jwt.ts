@@ -1,8 +1,10 @@
 import { Context } from 'koa'
 import { prisma } from '../config'
+import {  } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import { unlessCfg } from '../app'
 import Result from '../common/Result'
+import { PrismaClientInitializationError } from '@prisma/client/runtime/library'
 
 export const jwtMiddleware = async (ctx: Context, next) => {
   try {
@@ -26,6 +28,8 @@ export const jwtMiddleware = async (ctx: Context, next) => {
             name: { equals: user['name'] },
             password: { equals: user['password'] },
           },
+        }).catch(() => {
+          return 
         })
         if (!instance) {
           ctx.body = Result.needLogin('用户不存在')
@@ -36,7 +40,13 @@ export const jwtMiddleware = async (ctx: Context, next) => {
       ctx.state.user = instance
     }
     await next()
-  } catch (error) {
+  } catch (error: any) {
     console.log('error', error)
+    if (error instanceof PrismaClientInitializationError) {
+      ctx.body = Result.needLogin(error?.message)
+    } else {
+      ctx.body = Result.customFailed(error?.message)
+    }
+    
   }
 }
