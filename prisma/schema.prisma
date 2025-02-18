@@ -1,0 +1,85 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+generator zod {
+  provider     = "sh node_modules/.bin/zod-prisma"
+  output       = "../src/zod"
+  useDecimalJs = "true"
+}
+
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+  output   = "../public/prisma-docs"
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  relationMode      = "prisma"
+}
+
+model article {
+  id       Int      @id @default(autoincrement()) @db.UnsignedInt
+  url      String   @default("") @db.VarChar(300)
+  osskey   String   @default("") @db.VarChar(100)
+  title    String   @default("") @db.VarChar(200)
+  authorId Int      @db.UnsignedInt
+  createAt DateTime @default(now()) @db.Timestamp(0)
+  updateAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  author   user     @relation(fields: [authorId], references: [id])
+
+  @@index([authorId])
+}
+
+model user {
+  id       Int       @id @default(autoincrement()) @db.UnsignedInt
+  name     String    @default("") @db.VarChar(20)
+  password String    @default("") @db.VarChar(100)
+  roleId   Int       @db.UnsignedInt
+  createAt DateTime  @default(now()) @db.Timestamp(0)
+  updateAt DateTime  @default(now()) @updatedAt @db.Timestamp(0)
+  articles article[]
+  role     role      @relation(fields: [roleId], references: [id])
+  form     form[]
+
+  @@index([roleId])
+}
+
+model role {
+  id       Int      @id @default(autoincrement()) @db.UnsignedInt
+  name     String   @default("") @db.VarChar(100)
+  code     String   @default("") @db.VarChar(100)
+  createAt DateTime @default(now()) @db.Timestamp(0)
+  updateAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  users    user[]
+}
+
+model category {
+  id       Int      @id @default(autoincrement()) @db.UnsignedInt
+  code     String   @default("") @db.VarChar(100)
+  name     String   @default("") @db.VarChar(100)
+  createAt DateTime @default(now()) @db.Timestamp(0)
+  updateAt DateTime @default(now()) @db.Timestamp(0)
+  form     form[]
+}
+
+model form {
+  id         String    @default("") @map("id") @db.VarChar(150)
+  name       String    @db.VarChar(100)
+  config     String    @db.Text
+  extConfig  String?   @db.Text
+  authorId   Int       @db.UnsignedInt
+  categoryId Int?
+  createAt   DateTime  @default(now()) @db.Timestamp(0)
+  updateAt   DateTime  @default(now()) @db.Timestamp(0)
+  versionId  String    @id @unique(map: "versionId") @default("") @db.VarChar(100)
+  author     user      @relation(fields: [authorId], references: [id])
+  category   category? @relation(fields: [categoryId], references: [id])
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([id], map: "uid")
+}

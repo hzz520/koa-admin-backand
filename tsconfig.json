@@ -1,0 +1,18 @@
+{
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2015",
+    "module": "CommonJS",
+    "noImplicitAny": false,
+    "moduleResolution": "Node",
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "allowJs": true,
+    "resolveJsonModule": true,
+  }
+}
