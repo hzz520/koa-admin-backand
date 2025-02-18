@@ -4,8 +4,8 @@
   "description": "node中间层",
   "main": "src/app.js",
   "scripts": {
-    "generate": "prisma db pull && prisma db execute --file prisma/init.sql --schema prisma/schema.prisma && prisma generate && ts-node ./scripts/generate.ts",
-    "migrate": "prisma db execute --file prisma/create_database.sql --schema prisma/schema.prisma && prisma migrate dev --name init && npm run generate",
+    "generate": "prisma db push && prisma db execute --file prisma/init.sql --schema prisma/schema.prisma && prisma generate && ts-node ./scripts/generate.ts",
+    "migrate": "prisma migrate dev --name init && npm run generate",
     "build": "tsc",
     "start": "cross-env NODE_ENV=local nodemon ./src/app.ts",
     "serve": "tsc && ecosystem.config.js --env production",
