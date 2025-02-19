@@ -30,10 +30,15 @@ console.log('isProd: ', isProd)
 
 var context: Partial<{
   redis: RedisClientType<any, any, any>
-}> = {};
+}> = {}
 
 export const unlessCfg = {
-  path: ['/api/user/login', '/api/user/registry', '/api/user/changPwd'],
+  path: [
+    '/api/user/login',
+    '/api/user/registry',
+    '/api/user/changPwd',
+    '/api/user/logout',
+  ],
   custom: (ctx) => {
     return !ctx.request.path.startsWith('/api')
   },
@@ -51,12 +56,12 @@ app.use(async (ctx: Context, next) => {
   ctx.prisma = prisma
   try {
     const redis = await createClient({
-      url: config.redis.url
+      url: config.redis.url,
     })
-    .on('error', (err) => {
-      console.log('Redis Client Error', err)
-    })
-    .connect()
+      .on('error', (err) => {
+        console.log('Redis Client Error', err)
+      })
+      .connect()
     ctx.redis = redis
     context.redis = redis
   } catch (error) {
@@ -73,14 +78,18 @@ app.use(
     secret: config.jwt.secret,
     tokenKey: 'authorization',
     key: 'secret',
-    isRevoked: async (ctx: Context, user, token) => {  
+    isRevoked: async (ctx: Context, user, token) => {
+      if (ctx.request.path === '/api/user/logout') {
+        ctx.redis.del(`jwt_${user['name']}`)
+        return false
+      }
       const cToken = await ctx.redis.get(`jwt_${user['name']}`)
 
       if (cToken !== token) {
         ctx.body = Result.needLogin('登录失效')
         return true
       }
-      
+
       let instance = await prisma.user.findFirst({
         select: {
           id: true,
@@ -100,7 +109,7 @@ app.use(
         ctx.logger.info('jwt', instance)
         return false
       }
-      
+
       return false
     },
     debug: true,

@@ -42,8 +42,9 @@ export class UserController {
         config.jwt.secret,
         { expiresIn: '1d' },
       )
-      let user = await jwt.decode(token, { complete: true })
-      ctx.redis.set(`jwt_${name}`, token, user?.['exp'])
+      ctx.redis.set(`jwt_${name}`, token, {
+        EX: 3600 * 24,
+      })
       ctx.body = Result.success(token)
     } catch (error) {
       ctx.body = Result.customFailed(error)
@@ -60,7 +61,7 @@ export class UserController {
   })
   async logout(ctx: Context) {
     try {
-      ctx.body = Result.needLogin()
+      ctx.body = Result.success()
     } catch (error) {
       ctx.body = Result.customFailed(error)
     }
@@ -161,19 +162,21 @@ export class UserController {
     },
   })
   @body(USER_ADD_BODY_DTO)
-  @middlewares([PermissionMiddleware((ctx) => {
-    let isSuperAdmin = ctx.state.user?.role?.code === 'superAdmin'
-    if (!isSuperAdmin) {
-      return {
-        pass: false,
-        msg: '非超级管理员权限不够',
+  @middlewares([
+    PermissionMiddleware((ctx) => {
+      let isSuperAdmin = ctx.state.user?.role?.code === 'superAdmin'
+      if (!isSuperAdmin) {
+        return {
+          pass: false,
+          msg: '非超级管理员权限不够',
+        }
       }
-    }
-    return {
-      pass: true,
-      msg: '',
-    }
-  })])
+      return {
+        pass: true,
+        msg: '',
+      }
+    }),
+  ])
   async add(ctx: Context) {
     let data = ctx.request.body as z.infer<typeof USER_ADD_BODY_DTO>
     try {
@@ -193,19 +196,21 @@ export class UserController {
     },
   })
   @body(DEL_BODY_DTO)
-  @middlewares([PermissionMiddleware((ctx) => {
-    let isSuperAdmin = ctx.state.user?.role?.code === 'superAdmin'
-    if (!isSuperAdmin) {
-      return {
-        pass: false,
-        msg: '非超级管理员权限不够',
+  @middlewares([
+    PermissionMiddleware((ctx) => {
+      let isSuperAdmin = ctx.state.user?.role?.code === 'superAdmin'
+      if (!isSuperAdmin) {
+        return {
+          pass: false,
+          msg: '非超级管理员权限不够',
+        }
       }
-    }
-    return {
-      pass: true,
-      msg: '',
-    }
-  })])
+      return {
+        pass: true,
+        msg: '',
+      }
+    }),
+  ])
   async del(ctx: Context) {
     try {
       let data = ctx.request.body as z.infer<typeof DEL_BODY_DTO>
