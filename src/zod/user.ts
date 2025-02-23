@@ -1,5 +1,16 @@
-import * as z from "zod"
-import { Completearticle, RelatedarticleModel, Completerole, RelatedroleModel, Completeform, RelatedformModel } from "./index"
+import * as z from 'zod'
+import {
+  Completearticle,
+  RelatedarticleModel,
+  Completerole,
+  RelatedroleModel,
+  Completeform,
+  RelatedformModel,
+  Completemessage,
+  RelatedmessageModel,
+  CompleteuserRooms,
+  RelateduserRoomsModel,
+} from './index'
 
 export const userModel = z.object({
   id: z.number().int(),
@@ -14,6 +25,8 @@ export interface Completeuser extends z.infer<typeof userModel> {
   articles: Completearticle[]
   role: Completerole
   form: Completeform[]
+  messages: Completemessage[]
+  rooms: CompleteuserRooms[]
 }
 
 /**
@@ -21,8 +34,12 @@ export interface Completeuser extends z.infer<typeof userModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelateduserModel: z.ZodSchema<Completeuser> = z.lazy(() => userModel.extend({
-  articles: RelatedarticleModel.array(),
-  role: RelatedroleModel,
-  form: RelatedformModel.array(),
-}))
+export const RelateduserModel: z.ZodSchema<Completeuser> = z.lazy(() =>
+  userModel.extend({
+    articles: RelatedarticleModel.array(),
+    role: RelatedroleModel,
+    form: RelatedformModel.array(),
+    messages: RelatedmessageModel.array(),
+    rooms: RelateduserRoomsModel.array(),
+  }),
+)

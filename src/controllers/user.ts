@@ -32,10 +32,11 @@ export class UserController {
   async login(ctx: Context) {
     try {
       let data = ctx.request.body as z.infer<typeof USER_LOGIN_BODY_DTO>
-      const { name, password } = await service.login(data)
+      const { name, password, id } = await service.login(data)
 
       let token = jwt.sign(
         {
+          id,
           name,
           password,
         },
@@ -93,7 +94,7 @@ export class UserController {
   }
 
   @routeConfig({
-    path: '/changPwd',
+    path: '/changePwd',
     method: 'post',
     summary: '修改密码',
     request: {},

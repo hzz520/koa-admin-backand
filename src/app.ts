@@ -19,8 +19,11 @@ import { getLocalIP } from './utils'
 import Result from './common/Result'
 import router from './routes'
 import { loggerMiddleware } from './middlewares/logger'
-import { Logger } from 'log4js'
 import path from 'path'
+import { Server } from 'socket.io'
+import { createServer } from 'http'
+import socketioJwt from 'socketio-jwt'
+import ChatRoomConnection from './middlewares/chatroom'
 
 const { port, isProd, isLocal } = config
 console.log('isProd: ', isProd)
@@ -44,13 +47,9 @@ export const unlessCfg = {
   },
 }
 
-const app = new Koa<{
-  file: File
-  files: File[]
-  fields: { [key: string]: any }
-  logger: Logger
-  errLogger: Logger
-}>()
+const app = new Koa()
+const httpServer = createServer(app.callback())
+
 app.use(async (ctx: Context, next) => {
   ctx.config = config
   ctx.prisma = prisma
@@ -137,7 +136,24 @@ app.use((ctx) => {
   ctx.body = Result.notFound()
 })
 
-app.listen(port)
+const io = new Server()
+io.attach(httpServer, {
+  cors: {
+    origin: '*',
+    allowedHeaders: ['Authorization', 'roomId'],
+  },
+  path: '/ws',
+})
+io.use(
+  socketioJwt.authorize({
+    encodedPropertyName: 'authorization',
+    secret: config.jwt.secret,
+    handshake: true,
+  }),
+)
+ChatRoomConnection(io)
+
+httpServer.listen(port)
 
 if (isLocal) {
   console.log(`\nenter rs to resatrt\n`)

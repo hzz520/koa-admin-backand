@@ -35,15 +35,17 @@ model article {
 }
 
 model user {
-  id       Int       @id @default(autoincrement()) @db.UnsignedInt
-  name     String    @default("") @db.VarChar(20)
-  password String    @default("") @db.VarChar(100)
-  roleId   Int       @db.UnsignedInt
-  createAt DateTime  @default(now()) @db.Timestamp(0)
-  updateAt DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  articles article[]
-  role     role      @relation(fields: [roleId], references: [id])
-  form     form[]
+  id        Int         @id @default(autoincrement()) @db.UnsignedInt
+  name      String      @default("") @db.VarChar(20)
+  password  String      @default("") @db.VarChar(100)
+  roleId    Int         @db.UnsignedInt
+  createAt  DateTime    @default(now()) @db.Timestamp(0)
+  updateAt  DateTime    @default(now()) @updatedAt @db.Timestamp(0)
+  articles  article[]
+  role      role        @relation(fields: [roleId], references: [id])
+  form      form[]
+  messages  message[]
+  rooms userRooms[]
 
   @@index([roleId])
 }
@@ -82,4 +84,42 @@ model form {
   @@index([authorId])
   @@index([categoryId])
   @@index([id], map: "uid")
+}
+
+model message {
+  id       Int      @id @default(autoincrement()) @db.UnsignedInt
+  message  String?  @db.Text
+  userId   Int?
+  roomId   Int
+  createAt DateTime @default(now()) @db.Timestamp(0)
+  updateAt DateTime @default(now()) @db.Timestamp(0)
+  system   Int
+  user     user?     @relation(fields: [userId], references: [id])
+  room     room     @relation(fields: [roomId], references: [id])
+
+  @@index([userId])
+  @@index([roomId])
+}
+
+model room {
+  id        Int         @id @default(autoincrement()) @db.UnsignedInt
+  muiltple  Int
+  name      String      @default("") @db.VarChar(100)
+  createAt  DateTime    @default(now()) @db.Timestamp(0)
+  updateAt  DateTime    @default(now()) @db.Timestamp(0)
+  users     userRooms[]
+  messages  message[]
+}
+
+model userRooms {
+  userId   Int
+  roomId   Int
+  createAt DateTime @default(now()) @db.Timestamp(0)
+  updateAt DateTime @default(now()) @db.Timestamp(0)
+  user     user     @relation(fields: [userId], references: [id])
+  room     room     @relation(fields: [roomId], references: [id])
+
+  @@id([userId, roomId])
+  @@index([userId])
+  @@index([roomId])
 }

@@ -41,9 +41,9 @@ class UserService {
       updateAt: {
         gte: updateAt?.[0],
         lte: updateAt?.[1],
-      }
+      },
     } as Prisma.userWhereInput
-    
+
     const total = await prisma.user.count({ where })
     const list = await prisma.user.findMany({
       select: {
@@ -69,6 +69,19 @@ class UserService {
   }
   async login({ name, password }: z.infer<typeof USER_LOGIN_BODY_DTO>) {
     const user = await prisma.user.findFirst({
+      select: {
+        id: true,
+        name: true,
+        password: true,
+        roleId: true,
+        role: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+      },
       where: {
         name: { equals: name },
         password: { equals: this.genPwd(password) },
@@ -114,6 +127,9 @@ class UserService {
     newPassword,
   }: z.infer<typeof CHANGE_USER_PWD_BODY_DTO>) {
     return this.login({ name, password }).then((user) => {
+      if (user.role.code === 'superAdmin') {
+        return Promise.reject('超级管理员密码不允许变更')
+      }
       return prisma.user.update({
         where: { id: user.id },
         data: { name, password: this.genPwd(newPassword) },
@@ -188,7 +204,8 @@ class UserService {
         where: { id },
         select: { role: true },
       })) || {}
-    if (role?.code && role?.code === 'superAdmin') return Promise.reject('超级管理员角色的用户不能删除')
+    if (role?.code && role?.code === 'superAdmin')
+      return Promise.reject('超级管理员角色的用户不能删除')
     await prisma.user.delete({ where: { id } })
   }
 }
