@@ -136,7 +136,8 @@ app.use((ctx) => {
   ctx.body = Result.notFound()
 })
 
-const io = new Server()
+export const io = new Server()
+
 io.attach(httpServer, {
   cors: {
     origin: '*',
