@@ -26,7 +26,7 @@ where not exists (
 );
 
 insert into `user`(`name`, `password`, `roleId`) 
-select '张三','a3aa6035b15bb6ea4041a939c315914a',3 FROM dual 
+select '张三','a3aa6035b15bb6ea4041a939c315914a',2 FROM dual 
 where not exists (
   select name from user where name = '张三'
 );
