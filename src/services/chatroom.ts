@@ -72,7 +72,7 @@ export class ChatRoomService {
     if (!room) return
 
     if (!room?.users?.some?.((item) => item.userId === userId)) {
-      let message = `欢迎 ${this.socket?.decoded_token.name} 加入${room?.name}`
+      let message = `欢迎 ${this.socket?.decoded_token.name} 加入 ${room?.name}`
       await prisma.$transaction([
         prisma.userRooms.create({
           data: {
